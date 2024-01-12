@@ -3,19 +3,26 @@
 let dades;
 
 // ARRAYS
-let pokemons = [], municipis = [], meteorits = [], movies = [];
+let pokemons = [], municipis = [], meteorits = [], movies = [], llista = [];
 // POKEMONS
 fetch("js/data/pokemon.json")
 	.then((response) => response.json())
 	.then((data) => {
 		dades = data.pokemon;
 
-		console.log(dades)
+		//console.log(dades)
 		for (let i in dades) {
-			console.log(dades[i].name)
+			//console.log(dades[i].name)
 			pokemons.push(dades[i].name)
 		}
+
+		dades.forEach((pokemon) => {
+			let pokemonSenseKG = parseFloat(pokemon.weight);
+			llista.push([pokemon.id, pokemon.name, pokemon.img, pokemonSenseKG]);
+		});
+		console.log(llista);
 	});
+
 
 
 
@@ -65,7 +72,7 @@ fetch("js/data/pokemon.json")
 function orderList(ordre) {
 	if (ordre == "asc") {
 		pokemons.sort();
-	} else if (ordre == "desc"){
+	} else if (ordre == "desc") {
 		pokemons.reverse();
 	}
 	console.log(pokemons)
@@ -80,14 +87,46 @@ function searchList(index) {
 	console.log("Pokémon amb índex número " + index + ": " + pokemons[index]);
 }
 
-function arrayMultidimensional() {
-	const allPokemonArray = pokemons.map(pokemon => ({
-		id: pokemon.id,
-		name: pokemon.name,
-		img: pokemon.img,
-		weight: pokemon.weight
-	  }));
-	  
-	  console.log(allPokemonArray);
+function calcMitjana() {
+	let pesTotal = 0, c = 0;
+	dades.forEach((pokemon) => {
+		pesTotal += parseFloat(pokemon.weight);
+		c++;
+	});
+	let mitjana = pesTotal / c;
+	alert(mitjana.toFixed(2));
 }
 
+function printList() {
+	let div = document.getElementById("resultat");
+	let table = document.createElement("table");
+	let tbody = document.createElement("tbody");
+	
+	let filaTitols = document.createElement("tr");
+	let titols = ["ID", "Nom", "Imatge", "Pes"];
+	titols.forEach(titol => {
+		let th = document.createElement("th");
+		th.textContent = titol;
+		filaTitols.appendChild(th);
+	});
+	tbody.appendChild(filaTitols);
+
+	llista.forEach((filaDades => {
+		let fila = document.createElement("tr");
+		filaDades.forEach((dades) => {
+			let casella = document.createElement("td");
+			casella.textContent = dades;
+			fila.appendChild(casella);
+		});
+		tbody.appendChild(filaTitols);
+	}))
+
+	table.appendChild(tbody);
+	div.appendChild(table);
+	table.setAttribute("border", "1");
+	document.body.appendChild(table);
+	llista.forEach((pokemon) => {
+
+	})
+
+}
