@@ -1,43 +1,40 @@
 
 // POKEMONS
-let dades;
+let dadesPokemons, dadesMunicipis, dadesMeteorits, dadesPelis;
 
 // ARRAYS
 let pokemons = [], municipis = [], meteorits = [], movies = [], llista = [];
+
 // POKEMONS
 fetch("js/data/pokemon.json")
 	.then((response) => response.json())
 	.then((data) => {
-		dades = data.pokemon;
+		dadesPokemons = data.pokemon;
 
 		//console.log(dades)
-		for (let i in dades) {
+		for (let i in dadesPokemons) {
 			//console.log(dades[i].name)
-			pokemons.push(dades[i].name)
+			pokemons.push(dadesPokemons[i].name)
 		}
 
-		dades.forEach((pokemon) => {
+		dadesPokemons.forEach((pokemon) => {
 			let pokemonSenseKG = parseFloat(pokemon.weight);
 			llista.push([pokemon.id, pokemon.name, pokemon.img, pokemonSenseKG]);
 		});
-		console.log(llista);
 	});
 
+// MUNICIPIS
+fetch("js/data/municipis.json")
+	.then((response) => response.json())
+	.then((data) => {
+		dades = data.elements;
 
-
-
-// // MUNICIPIS
-// fetch("js/data/municipis.json")
-// 	.then((response) => response.json())
-// 	.then((data) => {
-// 		dades = data.elements;
-
-// 		console.log(dades)
-// 		for (let i in dades) {
-// 			console.log(dades[i].municipi_nom)
-// 			municipis.push(dades[i].municipi_nom)
-// 		}
-// 	});
+		console.log(dades)
+		for (let i in dades) {
+			console.log(dades[i].municipi_nom)
+			municipis.push(dades[i].municipi_nom)
+		}
+	});
 
 
 
@@ -89,7 +86,7 @@ function searchList(index) {
 
 function calcMitjana() {
 	let pesTotal = 0, c = 0;
-	dades.forEach((pokemon) => {
+	dadesPokemons.forEach((pokemon) => {
 		pesTotal += parseFloat(pokemon.weight);
 		c++;
 	});
@@ -103,7 +100,7 @@ function printList() {
 	let tbody = document.createElement("tbody");
 	
 	let filaTitols = document.createElement("tr");
-	let titols = ["ID", "Nom", "Imatge", "Pes"];
+	let titols = ["ID", "NOM", "IMATGE", "PES"];
 	titols.forEach(titol => {
 		let th = document.createElement("th");
 		th.textContent = titol;
@@ -111,22 +108,39 @@ function printList() {
 	});
 	tbody.appendChild(filaTitols);
 
-	llista.forEach((filaDades => {
+	for (let pokemon of llista) {
 		let fila = document.createElement("tr");
-		filaDades.forEach((dades) => {
-			let casella = document.createElement("td");
-			casella.textContent = dades;
-			fila.appendChild(casella);
-		});
-		tbody.appendChild(filaTitols);
-	}))
+
+		// ID
+		let casellaID = document.createElement("td");
+		casellaID.textContent = pokemon[0];
+		fila.appendChild(casellaID);
+
+		// Nom
+		let casellaNom = document.createElement("td");
+		casellaNom.textContent = pokemon[1];
+		fila.appendChild(casellaNom);
+	  
+		// Imatge
+		//let img = document.createElement("img");
+		let casellaImatge = document.createElement("td");
+		casellaImatge.innerHTML = "<img src='" + pokemon[2] +"'></img>";
+		
+		//casellaImatge.appendChild(img);
+		fila.appendChild(casellaImatge);
+	  
+		// Pes
+		let casellaPes = document.createElement("td");
+		casellaPes.textContent = pokemon[3];
+		fila.appendChild(casellaPes);
+		
+		tbody.appendChild(fila);
+	}
 
 	table.appendChild(tbody);
 	div.appendChild(table);
-	table.setAttribute("border", "1");
 	document.body.appendChild(table);
-	llista.forEach((pokemon) => {
-
-	})
 
 }
+
+console.log(llista);
