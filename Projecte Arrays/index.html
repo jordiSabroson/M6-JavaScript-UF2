@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 	<meta charset="UTF-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -8,7 +9,27 @@
 	<link rel="stylesheet" href="style.css">
 	<script src="js/script.js"></script>
 </head>
+
 <body>
+	<ul>
+		<form>
+			<input type="radio" name="form" value="pokemons">
+			<label for="pokemons">Pokemons</label>
+			<br><br>
+			<input type="radio" name="form" value="municipis">
+			<label for="municipis">Municipis</label>
+			<br><br>
+			<input type="radio" name="form" value="meteorits">
+			<label for="meteorits">Meteorits</label>
+			<br><br>
+			<input type="radio" name="form" value="movies">
+			<label for="movies">Movies</label>
+			<br><br>
+			<input type="submit" name="submit" value="Submit" onclick="triarJSON()">
+			<br>
+		</form>
+	</ul>
+	
 	<button onclick="printList()">Imprimir taula</button>
 	<button onclick="orderList('asc')">Ordre ascendent</button>
 	<button onclick="orderList('desc')">Ordre descendent</button>
@@ -17,4 +38,5 @@
 	<button onclick="location.reload()">Reiniciar</button>
 	<div id="resultat"></div>
 </body>
+
 </html>
