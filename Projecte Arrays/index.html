@@ -8,6 +8,7 @@
 	<title>ARRAYS</title>
 	<link rel="stylesheet" href="style.css">
 	<script src="js/script.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
@@ -29,14 +30,18 @@
 			<br>
 		</form>
 	</ul>
-	
+
 	<button onclick="printList()">Imprimir taula</button>
 	<button onclick="orderList('asc')">Ordre ascendent</button>
 	<button onclick="orderList('desc')">Ordre descendent</button>
 	<button onclick="searchList()">Buscar</button>
 	<button onclick="calcMitjana()">Calcular la mitjana</button>
+	<button onclick="grafic()">Gràfic</button>
 	<button onclick="location.reload()">Reiniciar</button>
 	<div id="resultat"></div>
+	<div class="chart-container" style="position: relative; width:700px">
+		<canvas id="myChart"></canvas>
+	</div>
 </body>
 
 </html>

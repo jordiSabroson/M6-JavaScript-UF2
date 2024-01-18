@@ -1,18 +1,24 @@
+// Variables que s'utilitzen per emmagatzemar les dades dels JSONs
 let dades = null;
 let llista = [];
 let noms = [];
+let bbdd;
+
+// Arrays que s'utilitzen per visualitzar els gràfics
+let arrayLabels = [], arrayDadesGraf = [], backgroundColor = [], borderColor = [];
 
 function triarJSON() {
 	event.preventDefault();
 	dades = null;
 	llista = [];
 	noms = [];
+	console.clear();
 	let valor = document.querySelector('input[value="pokemons"]:checked') ||
 		document.querySelector('input[value="municipis"]:checked') ||
 		document.querySelector('input[value="meteorits"]:checked') ||
 		document.querySelector('input[value="movies"]:checked');
 
-	let bbdd = valor.value;
+	bbdd = valor.value;
 	if (bbdd == "pokemons") {
 		// POKEMONS
 		fetch("js/data/pokemon.json")
@@ -33,8 +39,16 @@ function triarJSON() {
 				});
 
 				// Imprimir l'array anterior en forma de taula per consola
-				console.table(llista);
+				//console.table(llista);
+
+				// Arrays pel gràfic
+				for (let i in dades) {
+					if (!arrayLabels.includes(dades[i].type))
+					arrayLabels.push(dades[i].type)
+				}
+				console.log(arrayLabels);
 			});
+
 	} else if (bbdd == "municipis") {
 		// MUNICIPIS
 		fetch("js/data/municipis.json")
@@ -115,10 +129,13 @@ function calcMitjana() {
 		});
 	} else if (bbdd == "municipis") {
 		alert("No hi ha valors amb els que calcular una mitjana!");
+		return;
 	} else if (bbdd == "meteorits") {
 		dades.forEach((item) => {
-			total += parseFloat(item.mass);
-			c++;
+			if (item.mass != undefined) {
+				total += parseFloat(item.mass);
+				c++;
+			}
 		});
 	} else if (bbdd == "movies") {
 		dades.forEach((item) => {
@@ -127,7 +144,7 @@ function calcMitjana() {
 		});
 	}
 	let mitjana = total / c;
-	alert(mitjana.toFixed(2));
+	alert("Mitjana: " + mitjana.toFixed(2));
 }
 
 function printList() {
@@ -135,6 +152,7 @@ function printList() {
 		alert("Selecciona una base de dades abans!");
 	} else {
 		let div = document.getElementById("resultat");
+		div.innerHTML = "";
 		let table = document.createElement("table");
 		let tbody = document.createElement("tbody");
 		let filaTitols = document.createElement("tr");
@@ -177,6 +195,37 @@ function printList() {
 
 		table.appendChild(tbody);
 		div.appendChild(table);
-		document.body.appendChild(table);
+		document.body.appendChild(div);
 	}
+}
+
+
+// GRÀFIC
+function grafic() {
+let myChart = new Chart(
+	document.getElementById('myChart'),
+	config
+);
+
+const config = {
+	type: 'polarArea',
+	data: data,
+	options: {}
+  };
+
+const data = {
+	labels: ['Red', 'Green', 'Yellow', 'Grey', 'Blue'],
+	datasets: [{
+		label: 'My First Dataset',
+		data: [11, 16, 7, 3, 14],
+		backgroundColor: [
+			'rgb(255, 99, 132)',
+			'rgb(75, 192, 192)',
+			'rgb(255, 205, 86)',
+			'rgb(201, 203, 207)',
+			'rgb(54, 162, 235)'
+		],
+	borderColor: []
+	}]
+};
 }
