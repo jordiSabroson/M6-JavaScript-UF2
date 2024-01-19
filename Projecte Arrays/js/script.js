@@ -44,9 +44,8 @@ function triarJSON() {
 				// Arrays pel gràfic
 				for (let i in dades) {
 					if (!arrayLabels.includes(dades[i].type))
-					arrayLabels.push(dades[i].type)
+						arrayLabels.push(dades[i].type)
 				}
-				console.log(arrayLabels);
 			});
 
 	} else if (bbdd == "municipis") {
@@ -103,12 +102,47 @@ function triarJSON() {
 
 
 function orderList(ordre) {
+	let table = document.getElementById("taula");
+	let tbody = table.getElementsByTagName("tbody")[0];
+	let rows = [].slice.call(tbody.getElementsByTagName("tr"));
 	if (ordre == "asc") {
+		rows.sort(function (a, b) {
+			let aText = a.cells[1].textContent.trim();
+			let bText = b.cells[1].textContent.trim();
+			return aText.localeCompare(bText);
+		});
+
+		// Elimina las filas existentes de la tabla, excepto la primera (encabezados)
+		for (let i = tbody.children.length - 1; i > 0; i--) {
+			tbody.removeChild(tbody.children[i]);
+		}
+
+		// Agrega las filas ordenadas a la tabla
+		rows.forEach(function (row) {
+			tbody.appendChild(row);
+		});
 		noms.sort();
+		console.log(noms);
 	} else if (ordre == "desc") {
+		rows.sort(function (a, b) {
+			let aText = a.cells[1].textContent.trim();
+			let bText = b.cells[1].textContent.trim();
+			// Invierte el resultado de la comparación
+			return -aText.localeCompare(bText);
+		});
+
+		// Elimina las filas existentes de la tabla, excepto la primera (encabezados)
+		for (let i = tbody.children.length - 1; i > 0; i--) {
+			tbody.removeChild(tbody.children[i]);
+		}
+
+		// Agrega las filas ordenadas a la tabla
+		rows.forEach(function (row) {
+			tbody.appendChild(row);
+		});
 		noms.reverse();
+		console.log(noms);
 	}
-	console.log(noms)
 }
 
 function searchList(index) {
@@ -151,9 +185,13 @@ function printList() {
 	if (dades == null) {
 		alert("Selecciona una base de dades abans!");
 	} else {
+		if (myChart) {
+			myChart.destroy();
+		}
 		let div = document.getElementById("resultat");
 		div.innerHTML = "";
 		let table = document.createElement("table");
+		table.id = "taula";
 		let tbody = document.createElement("tbody");
 		let filaTitols = document.createElement("tr");
 		let titols = ["ID", "NOM", "IMATGE", "PES"];
@@ -199,33 +237,89 @@ function printList() {
 	}
 }
 
-
 // GRÀFIC
+let myChart = null;
 function grafic() {
-let myChart = new Chart(
-	document.getElementById('myChart'),
-	config
-);
+	document.getElementById("resultat").innerHTML = "";
 
-const config = {
-	type: 'polarArea',
-	data: data,
-	options: {}
-  };
+	const data = {
+			labels: [],
+			datasets: [{
+				label: '',
+				data: [11, 16, 7, 3, 14],
+				backgroundColor: [
+					'rgb(255, 99, 132)',
+					'rgb(75, 192, 192)',
+					'rgb(255, 205, 86)',
+					'rgb(201, 203, 207)',
+					'rgb(54, 162, 235)'
+				],
+				borderColor: []
+			}]
+		};
+	const config = {
+		type: 'polarArea',
+		data: data,
+		options: {}
+	};
 
-const data = {
-	labels: ['Red', 'Green', 'Yellow', 'Grey', 'Blue'],
-	datasets: [{
-		label: 'My First Dataset',
-		data: [11, 16, 7, 3, 14],
-		backgroundColor: [
-			'rgb(255, 99, 132)',
-			'rgb(75, 192, 192)',
-			'rgb(255, 205, 86)',
-			'rgb(201, 203, 207)',
-			'rgb(54, 162, 235)'
-		],
-	borderColor: []
-	}]
-};
+	
+	let grafMap = new Map();
+	if (bbdd == "pokemons") {
+		//Pokemons
+		dades.forEach((pokemon) => {
+			pokemon.type.forEach((type) => {
+				if (!grafMap.has(type)) {
+					grafMap.set(type, 0);
+				}
+				grafMap.set(type, grafMap.get(type) + 1);
+			});
+		});
+		grafMap.forEach(function (value, key) {
+			data.labels.push(key);
+			data.datasets[0].data.push(value);
+		});
+	}
+
+	if (myChart) {
+		myChart.destroy();
+	}
+
+	myChart = new Chart(
+		document.getElementById('myChart'),
+		config
+	);
 }
+
+// Exercici 3
+document.addEventListener('DOMContentLoaded', function() {
+	let inputSearch = document.getElementById("txtSearch");
+    let table = document.getElementById("taula");
+
+    inputSearch.addEventListener('input', function (e) {
+        let searchTerm = inputSearch.value.trim().toLowerCase();
+
+        // Obtén todas las filas de la tabla
+        let rows = table.getElementsByTagName('tr');
+
+        // Itera sobre las filas (ignorando la primera fila de encabezados)
+        for (let i = 1; i < rows.length; i++) {
+            let row = rows[i];
+            let visible = false;
+
+            // Itera sobre las celdas de la fila
+            for (let j = 0; j < row.cells.length; j++) {
+                let cellText = row.cells[j].textContent.trim().toLowerCase();
+
+                // Verifica si el texto de la celda contiene la búsqueda
+                if (cellText.includes(searchTerm)) {
+                    visible = true;
+                    break; // No es necesario seguir revisando las otras celdas si ya encontramos una coincidencia
+                }
+            }
+
+            // Muestra u oculta la fila según si coincide con la búsqueda
+            row.style.display = visible ? '' : 'none';
+        }
+    });
+});
