@@ -1,8 +1,8 @@
 // Variables que s'utilitzen per emmagatzemar les dades dels JSONs
-let dades = null;
-let llista = [];
-let noms = [];
-let bbdd;
+let dades = null;	// Array on van totes les dades recuperades del JSON
+let llista = [];	// Array que emmagatzema les dades seleccionades per mostrar al DOM
+let noms = [];		// Array que només emmagatzema els noms dels elements dels arrays (ex 1)
+let bbdd;			// Variable per seleccionar el JSON
 
 // Arrays que s'utilitzen per visualitzar els gràfics
 let arrayLabels = [], arrayDadesGraf = [], backgroundColor = [], borderColor = [];
@@ -60,7 +60,7 @@ function triarJSON() {
 				}
 				console.log("Noms dels municipis: " + noms.join(", "));
 				dades.forEach((municipi) => {
-					llista.push([municipi.ine, municipi.municipi_nom, municipi.municipi_bandera]);
+					llista.push([municipi.grup_ajuntament.codi_postal, municipi.municipi_nom, municipi.municipi_bandera, municipi.nombre_habitants]);
 				});
 				console.table(llista);
 			});
@@ -76,7 +76,7 @@ function triarJSON() {
 				console.log("Noms dels meteorits: " + noms.join(", "));
 
 				dades.forEach((meteorit) => {
-					llista.push([meteorit.id, meteorit.name, meteorit.mass]);
+					llista.push([meteorit.id, meteorit.name, meteorit.mass, meteorit.year]);
 				});
 				console.table(llista);
 			});
@@ -102,47 +102,18 @@ function triarJSON() {
 
 
 function orderList(ordre) {
-	let table = document.getElementById("taula");
-	let tbody = table.getElementsByTagName("tbody")[0];
-	let rows = [].slice.call(tbody.getElementsByTagName("tr"));
-	if (ordre == "asc") {
-		rows.sort(function (a, b) {
-			let aText = a.cells[1].textContent.trim();
-			let bText = b.cells[1].textContent.trim();
-			return aText.localeCompare(bText);
-		});
+	let numColumna = 1; 
+	let llistaOrdenada = [...llista];
 
-		// Elimina las filas existentes de la tabla, excepto la primera (encabezados)
-		for (let i = tbody.children.length - 1; i > 0; i--) {
-			tbody.removeChild(tbody.children[i]);
-		}
+	llistaOrdenada.sort((a, b) => {
+		let compararValorA = String(a[numColumna] || '').toLowerCase();
+		let compararValorB = String(b[numColumna] || '').toLowerCase();
+		return ordre === 'asc' ? compararValorA.localeCompare(compararValorB) : compararValorB.localeCompare(compararValorA);
+	});
 
-		// Agrega las filas ordenadas a la tabla
-		rows.forEach(function (row) {
-			tbody.appendChild(row);
-		});
-		noms.sort();
-		console.log(noms);
-	} else if (ordre == "desc") {
-		rows.sort(function (a, b) {
-			let aText = a.cells[1].textContent.trim();
-			let bText = b.cells[1].textContent.trim();
-			// Invierte el resultado de la comparación
-			return -aText.localeCompare(bText);
-		});
-
-		// Elimina las filas existentes de la tabla, excepto la primera (encabezados)
-		for (let i = tbody.children.length - 1; i > 0; i--) {
-			tbody.removeChild(tbody.children[i]);
-		}
-
-		// Agrega las filas ordenadas a la tabla
-		rows.forEach(function (row) {
-			tbody.appendChild(row);
-		});
-		noms.reverse();
-		console.log(noms);
-	}
+	console.table(llistaOrdenada);
+	llista = llistaOrdenada;
+	printList();
 }
 
 function searchList(index) {
@@ -162,8 +133,10 @@ function calcMitjana() {
 			c++;
 		});
 	} else if (bbdd == "municipis") {
-		alert("No hi ha valors amb els que calcular una mitjana!");
-		return;
+		dades.forEach((item) => {
+			total += parseFloat(item.nombre_habitants);
+			c++;
+		});
 	} else if (bbdd == "meteorits") {
 		dades.forEach((item) => {
 			if (item.mass != undefined) {
@@ -178,13 +151,19 @@ function calcMitjana() {
 		});
 	}
 	let mitjana = total / c;
-	alert("Mitjana: " + mitjana.toFixed(2));
+	if (isNaN(mitjana)) {
+		alert("Selecciona una base de dades abans!");
+	} else {
+		alert("Mitjana: " + mitjana.toFixed(2));
+	}
 }
 
 function printList() {
 	if (dades == null) {
 		alert("Selecciona una base de dades abans!");
 	} else {
+		let titols;
+		document.getElementById("canvas").innerHTML = "";
 		if (myChart) {
 			myChart.destroy();
 		}
@@ -194,7 +173,15 @@ function printList() {
 		table.id = "taula";
 		let tbody = document.createElement("tbody");
 		let filaTitols = document.createElement("tr");
-		let titols = ["ID", "NOM", "IMATGE", "PES"];
+		if (bbdd == "pokemons") {
+			titols = ["ID", "NOM", "IMATGE", "PES"];
+		} else if (bbdd == "municipis") {
+			titols = ["CODI POSTAL", "NOM", "BANDERA", "NOMBRE D'HABITANTS"];
+		} else if (bbdd == "meteorits") {
+			titols = ["ID", "NOM", "MASSA", "ANY DE CAIGUDA"];
+		} else if (bbdd == "movies") {
+			titols = ["TÍTOL", "PUNTUACIÓ", "PORTADA", "ANY"];
+		}
 		titols.forEach(titol => {
 			let th = document.createElement("th");
 			th.textContent = titol;
@@ -216,9 +203,12 @@ function printList() {
 			fila.appendChild(casellaNom);
 
 			// Imatge
-			//let img = document.createElement("img");
 			let casellaImatge = document.createElement("td");
-			casellaImatge.innerHTML = "<img src='" + item[2] + "'></img>";
+			if (bbdd == "meteorits") {
+				casellaImatge.textContent = item[2];
+			} else {
+				casellaImatge.innerHTML = "<img alt='Imatge no disponible' src='" + item[2] + "'></img>";
+			}
 
 			//casellaImatge.appendChild(img);
 			fila.appendChild(casellaImatge);
@@ -241,7 +231,10 @@ function printList() {
 let myChart = null;
 function grafic() {
 	document.getElementById("resultat").innerHTML = "";
-
+	let grafic = document.createElement("canvas");
+	grafic.id = "myChart";
+	let canvas = document.getElementById("canvas");
+	canvas.appendChild(grafic);
 	const data = {
 			labels: [],
 			datasets: [{
@@ -267,8 +260,47 @@ function grafic() {
 	let grafMap = new Map();
 	if (bbdd == "pokemons") {
 		//Pokemons
-		dades.forEach((pokemon) => {
-			pokemon.type.forEach((type) => {
+		dades.forEach((item) => {
+			item.type.forEach((type) => {
+				if (!grafMap.has(type)) {
+					grafMap.set(type, 0);
+				}
+				grafMap.set(type, grafMap.get(type) + 1);
+			});
+		});
+		grafMap.forEach(function (value, key) {
+			data.labels.push(key);
+			data.datasets[0].data.push(value);
+		});
+	} else if (bbdd == "municipis") {
+		dades.forEach((item) => {
+			item.type.forEach((type) => {
+				if (!grafMap.has(type)) {
+					grafMap.set(type, 0);
+				}
+				grafMap.set(type, grafMap.get(type) + 1);
+			});
+		});
+		grafMap.forEach(function (value, key) {
+			data.labels.push(key);
+			data.datasets[0].data.push(value);
+		});
+	} else if (bbdd == "meteorits") {
+		dades.forEach((item) => {
+			item.type.forEach((type) => {
+				if (!grafMap.has(type)) {
+					grafMap.set(type, 0);
+				}
+				grafMap.set(type, grafMap.get(type) + 1);
+			});
+		});
+		grafMap.forEach(function (value, key) {
+			data.labels.push(key);
+			data.datasets[0].data.push(value);
+		});
+	} else if (bbdd == "movies") {
+		dades.forEach((item) => {
+			item.type.forEach((type) => {
 				if (!grafMap.has(type)) {
 					grafMap.set(type, 0);
 				}
