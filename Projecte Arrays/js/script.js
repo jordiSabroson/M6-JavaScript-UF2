@@ -313,6 +313,24 @@ function grafic() {
 		});
 	}
 
+	function getBackgroundColor() {
+		let r = getRandomNumber(0, 255);
+		let g = getRandomNumber(0, 255);
+		let b = getRandomNumber(0, 255);
+		let opacity = 0.2;
+		return `rgba(${r},${g},${b},${opacity})`;
+	  }
+	  
+	  function getBorderColor() {
+		let color = getBackgroundColor();
+		let opacity = 1;
+		return `${color},${opacity})`;
+	  }
+	  
+	  function getRandomNumber(min, max) {
+		return Math.floor(Math.random() * (max - min + 1)) + min;
+	  }
+
 	if (myChart) {
 		myChart.destroy();
 	}
