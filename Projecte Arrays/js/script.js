@@ -102,7 +102,12 @@ function triarJSON() {
 
 
 function orderList(ordre) {
-	let numColumna = 1; 
+	let numColumna;
+	if (bbdd == "movies") {
+		numColumna = 0;
+	} else {
+		numColumna = 1;
+	}
 	let llistaOrdenada = [...llista];
 
 	llistaOrdenada.sort((a, b) => {
@@ -235,79 +240,75 @@ function grafic() {
 	grafic.id = "myChart";
 	let canvas = document.getElementById("canvas");
 	canvas.appendChild(grafic);
-	const data = {
-			labels: [],
-			datasets: [{
-				label: '',
-				data: [11, 16, 7, 3, 14],
-				backgroundColor: [
-					'rgb(255, 99, 132)',
-					'rgb(75, 192, 192)',
-					'rgb(255, 205, 86)',
-					'rgb(201, 203, 207)',
-					'rgb(54, 162, 235)'
-				],
-				borderColor: []
-			}]
-		};
-	const config = {
+	let data = {
+		labels: [],
+		datasets: [{
+			label: '',
+			data: [],
+			backgroundColor: [
+				getBackgroundColor(),
+				getBackgroundColor(),
+				getBackgroundColor(),
+				getBackgroundColor(),
+				getBackgroundColor()
+			],
+			borderColor: getBorderColor()
+		}]
+	};
+	let config = {
 		type: 'polarArea',
 		data: data,
 		options: {}
 	};
 
-	
-	let grafMap = new Map();
+
+	let graficMap = new Map();
 	if (bbdd == "pokemons") {
 		//Pokemons
-		dades.forEach((item) => {
-			item.type.forEach((type) => {
-				if (!grafMap.has(type)) {
-					grafMap.set(type, 0);
+		dades.forEach((pokemon) => {
+			pokemon.type.forEach((tipus) => {
+				if (!graficMap.has(tipus)) {
+					graficMap.set(tipus, 0);
 				}
-				grafMap.set(type, grafMap.get(type) + 1);
+				graficMap.set(tipus, graficMap.get(tipus) + 1);
 			});
 		});
-		grafMap.forEach(function (value, key) {
+		graficMap.forEach(function (value, key) {
 			data.labels.push(key);
 			data.datasets[0].data.push(value);
 		});
 	} else if (bbdd == "municipis") {
-		dades.forEach((item) => {
-			item.type.forEach((type) => {
-				if (!grafMap.has(type)) {
-					grafMap.set(type, 0);
-				}
-				grafMap.set(type, grafMap.get(type) + 1);
-			});
+		dades.forEach((municipi) => {
+			if (!graficMap.has(municipi.grup_comarca.comarca_nom)) {
+				graficMap.set(municipi.grup_comarca.comarca_nom, 0);
+			}
+			graficMap.set(municipi.grup_comarca.comarca_nom, graficMap.get(municipi.grup_comarca.comarca_nom) + 1);
 		});
-		grafMap.forEach(function (value, key) {
+		graficMap.forEach(function (value, key) {
 			data.labels.push(key);
 			data.datasets[0].data.push(value);
 		});
 	} else if (bbdd == "meteorits") {
-		dades.forEach((item) => {
-			item.type.forEach((type) => {
-				if (!grafMap.has(type)) {
-					grafMap.set(type, 0);
-				}
-				grafMap.set(type, grafMap.get(type) + 1);
-			});
+		dades.forEach((meteorit) => {
+			if (!graficMap.has(meteorit.fall)) {
+				graficMap.set(meteorit.fall, 0);
+			}
+			graficMap.set(meteorit.fall, graficMap.get(meteorit.fall) + 1);
 		});
-		grafMap.forEach(function (value, key) {
+		graficMap.forEach(function (value, key) {
 			data.labels.push(key);
 			data.datasets[0].data.push(value);
 		});
 	} else if (bbdd == "movies") {
-		dades.forEach((item) => {
-			item.type.forEach((type) => {
-				if (!grafMap.has(type)) {
-					grafMap.set(type, 0);
+		dades.forEach((movies) => {
+			movies.genres.forEach((genere) => {
+				if (!graficMap.has(genere)) {
+					graficMap.set(genere, 0);
 				}
-				grafMap.set(type, grafMap.get(type) + 1);
+				graficMap.set(genere, graficMap.get(genere) + 1);
 			});
 		});
-		grafMap.forEach(function (value, key) {
+		graficMap.forEach(function (value, key) {
 			data.labels.push(key);
 			data.datasets[0].data.push(value);
 		});
@@ -319,17 +320,17 @@ function grafic() {
 		let b = getRandomNumber(0, 255);
 		let opacity = 0.2;
 		return `rgba(${r},${g},${b},${opacity})`;
-	  }
-	  
-	  function getBorderColor() {
+	}
+
+	function getBorderColor() {
 		let color = getBackgroundColor();
 		let opacity = 1;
 		return `${color},${opacity})`;
-	  }
-	  
-	  function getRandomNumber(min, max) {
+	}
+
+	function getRandomNumber(min, max) {
 		return Math.floor(Math.random() * (max - min + 1)) + min;
-	  }
+	}
 
 	if (myChart) {
 		myChart.destroy();
@@ -343,33 +344,9 @@ function grafic() {
 
 // Exercici 3
 document.addEventListener('DOMContentLoaded', function() {
-	let inputSearch = document.getElementById("txtSearch");
-    let table = document.getElementById("taula");
-
-    inputSearch.addEventListener('input', function (e) {
-        let searchTerm = inputSearch.value.trim().toLowerCase();
-
-        // Obtén todas las filas de la tabla
-        let rows = table.getElementsByTagName('tr');
-
-        // Itera sobre las filas (ignorando la primera fila de encabezados)
-        for (let i = 1; i < rows.length; i++) {
-            let row = rows[i];
-            let visible = false;
-
-            // Itera sobre las celdas de la fila
-            for (let j = 0; j < row.cells.length; j++) {
-                let cellText = row.cells[j].textContent.trim().toLowerCase();
-
-                // Verifica si el texto de la celda contiene la búsqueda
-                if (cellText.includes(searchTerm)) {
-                    visible = true;
-                    break; // No es necesario seguir revisando las otras celdas si ya encontramos una coincidencia
-                }
-            }
-
-            // Muestra u oculta la fila según si coincide con la búsqueda
-            row.style.display = visible ? '' : 'none';
-        }
+    let inputSearch = document.getElementById('txtSearch');
+    inputSearch.addEventListener('input', (e) => {
+		let valorInput = inputSearch.value.toLowerCase();
+		
     });
 });
