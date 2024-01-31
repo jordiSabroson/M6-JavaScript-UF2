@@ -3,6 +3,11 @@ let dades = null;	// Array on van totes les dades recuperades del JSON
 let llista = [];	// Array que emmagatzema les dades seleccionades per mostrar al DOM
 let noms = [];		// Array que només emmagatzema els noms dels elements dels arrays (ex 1)
 let bbdd;			// Variable per seleccionar el JSON
+let llistaOriginal = [];	// Array que guarda una còpia de la llista original
+let estatOrdreColumna = {	// Variable auxiliar per poder ordenar la taula
+    indexColumna: null,
+    ordreDireccio: 'asc',
+};
 
 // Arrays que s'utilitzen per visualitzar els gràfics
 let arrayLabels = [], arrayDadesGraf = [], backgroundColor = [], borderColor = [];
@@ -39,13 +44,10 @@ function triarJSON() {
 				});
 
 				// Imprimir l'array anterior en forma de taula per consola
-				//console.table(llista);
+				console.table(llista);
 
-				// Arrays pel gràfic
-				for (let i in dades) {
-					if (!arrayLabels.includes(dades[i].type))
-						arrayLabels.push(dades[i].type)
-				}
+				// Còpia de la llista per restablir-la més endavant
+				llistaOriginal = [...llista];
 			});
 
 	} else if (bbdd == "municipis") {
@@ -63,6 +65,7 @@ function triarJSON() {
 					llista.push([municipi.grup_ajuntament.codi_postal, municipi.municipi_nom, municipi.municipi_bandera, municipi.nombre_habitants]);
 				});
 				console.table(llista);
+				llistaOriginal = [...llista];
 			});
 	} else if (bbdd == "meteorits") {
 		// METEORITS
@@ -79,6 +82,7 @@ function triarJSON() {
 					llista.push([meteorit.id, meteorit.name, meteorit.mass, meteorit.year]);
 				});
 				console.table(llista);
+				llistaOriginal = [...llista];
 			});
 	} else if (bbdd == "movies") {
 		// MOVIES
@@ -96,6 +100,7 @@ function triarJSON() {
 					llista.push([movies.title, movies.rating, movies.url, movies.year]);
 				});
 				console.table(llista);
+				llistaOriginal = [...llista];
 			});
 	}
 }
@@ -120,6 +125,32 @@ function orderList(ordre) {
 	llista = llistaOrdenada;
 	printList();
 }
+
+function orderListTable(numColumna) {
+	let indexActualColumna = estatOrdreColumna.indexColumna;
+    let ordreActualDireccio = estatOrdreColumna.ordreDireccio;
+
+    let nouOrdreDireccio = indexActualColumna === numColumna ? (ordreActualDireccio === 'asc' ? 'desc' : 'asc') : 'asc';
+    estatOrdreColumna = { indexColumna: numColumna, ordreDireccio: nouOrdreDireccio };
+
+
+	llista.sort((a, b) => {
+		let compararValorA = a[numColumna];
+		let compararValorB = b[numColumna];
+		if (!isNaN(compararValorA) && !isNaN(compararValorB)) {
+            return nouOrdreDireccio === 'asc' ? compararValorA - compararValorB : compararValorB - compararValorA;
+        } else {
+            compararValorA = String(compararValorA).toLowerCase();
+            compararValorB = String(compararValorB).toLowerCase();
+            return nouOrdreDireccio === 'asc' ? compararValorA.localeCompare(compararValorB) : compararValorB.localeCompare(compararValorA);
+        }
+    });
+
+	console.table(llista);
+
+	printList();
+}
+
 
 function searchList(index) {
 	index = parseInt(prompt("introdueix un index per buscar a l'array [0 - " + noms.length + "]"));
@@ -187,9 +218,16 @@ function printList() {
 		} else if (bbdd == "movies") {
 			titols = ["TÍTOL", "PUNTUACIÓ", "PORTADA", "ANY"];
 		}
-		titols.forEach(titol => {
+		titols.forEach((titol, index) => {
 			let th = document.createElement("th");
-			th.textContent = titol;
+			if (titol == "IMATGE" || titol == "BANDERA" || titol == "PORTADA") {
+				th.textContent = titol;
+			} else {
+				th.textContent = titol;
+				th.onclick = function () {
+					orderListTable(index);
+				};
+			}
 			filaTitols.appendChild(th);
 		});
 		tbody.appendChild(filaTitols);
@@ -343,10 +381,30 @@ function grafic() {
 }
 
 // Exercici 3
-document.addEventListener('DOMContentLoaded', function() {
-    let inputSearch = document.getElementById('txtSearch');
-    inputSearch.addEventListener('input', (e) => {
+document.addEventListener('DOMContentLoaded', function () {
+	let inputSearch = document.getElementById('txtSearch');
+	inputSearch.addEventListener('input', (e) => {
 		let valorInput = inputSearch.value.toLowerCase();
-		
-    });
+		let listaFiltrada = llistaOriginal.filter(item => {
+			return item.some(value => {
+				let stringValue = String(value).toLowerCase();
+				return stringValue.includes(valorInput);
+			});
+		});
+
+		llista = [...listaFiltrada];
+		printList();
+
+	});
+
+	inputSearch.addEventListener('keydown', function (e) {
+		if (e.key === 'Enter') {
+			e.preventDefault();
+
+			if (inputSearch.value.trim() === '') {
+				llista = [...llistaOriginal];
+				printList();
+			}
+		}
+	});
 });
